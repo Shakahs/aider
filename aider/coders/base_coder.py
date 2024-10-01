@@ -19,6 +19,8 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 
 from aider import __version__, models, prompts, urls, utils
+from aider.vector_store import VectorStore
+import logging
 from aider.commands import Commands
 from aider.history import ChatSummary
 from aider.io import ConfirmGroup, InputOutput
@@ -90,6 +92,7 @@ class Coder:
     suggest_shell_commands = True
     ignore_mentions = None
     chat_language = None
+    logger = logging.getLogger(__name__)
 
     @classmethod
     def create(
@@ -274,6 +277,9 @@ class Coder:
         self.suggest_shell_commands = suggest_shell_commands
 
         self.num_cache_warming_pings = num_cache_warming_pings
+
+        # Initialize VectorStore
+        self.vector_store = VectorStore()
 
         if not fnames:
             fnames = []
@@ -1101,8 +1107,19 @@ class Coder:
         return chunks
 
     def send_message(self, inp):
+        # Search vector store for relevant information
+        vector_results = self.query_vector_store(inp)
+        formatted_results = self.format_vector_store_results(vector_results)
+        
+        # Log the vector store search results
+        self.logger.info(f"Vector store search results for input: {inp}")
+        self.logger.info(f"Formatted results: {formatted_results}")
+
+        # Add vector store results to the input
+        enhanced_inp = f"{inp}\n\nRelevant information from previous conversations:\n{formatted_results}"
+
         self.cur_messages += [
-            dict(role="user", content=inp),
+            dict(role="user", content=enhanced_inp),
         ]
 
         chunks = self.format_messages()
@@ -1249,6 +1266,9 @@ class Coder:
                 self.reflected_message += "\n\n" + add_rel_files_message
             else:
                 self.reflected_message = add_rel_files_message
+
+        # Log the final response
+        self.logger.info(f"Final response: {content}")
 
     def reply_completed(self):
         pass
@@ -1647,6 +1667,26 @@ class Coder:
         if new.rstrip() != new and not final:
             new = new.rstrip()
         return cur + new
+
+    def add_to_vector_store(self, text, metadata=None):
+        """Add text to the vector store."""
+        self.vector_store.add_text(text, metadata)
+
+    def query_vector_store(self, query, k=4):
+        """Query the vector store."""
+        return self.vector_store.query(query, k=k)
+
+    def format_vector_store_results(self, results):
+        """Format vector store results for insertion into the conversation."""
+        formatted_results = []
+        for result in results:
+            content = result.page_content
+            metadata = result.metadata
+            formatted_result = f"Relevant information:\n{content}\n"
+            if metadata:
+                formatted_result += f"Metadata: {metadata}\n"
+            formatted_results.append(formatted_result)
+        return "\n".join(formatted_results)
 
     def get_rel_fname(self, fname):
         try:

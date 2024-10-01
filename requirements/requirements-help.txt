@@ -44,7 +44,9 @@ click==8.1.7
     #   -c requirements/../requirements.txt
     #   nltk
 dataclasses-json==0.6.7
-    # via llama-index-core
+    # via
+    #   -c requirements/../requirements.txt
+    #   llama-index-core
 deprecated==1.2.14
     # via llama-index-core
 dirtyjson==1.0.8
@@ -102,6 +104,7 @@ jinja2==3.1.4
     #   torch
 joblib==1.4.2
     # via
+    #   -c requirements/../requirements.txt
     #   nltk
     #   scikit-learn
 llama-index-core==0.11.11
@@ -115,18 +118,24 @@ markupsafe==2.1.5
     #   -c requirements/../requirements.txt
     #   jinja2
 marshmallow==3.22.0
-    # via dataclasses-json
+    # via
+    #   -c requirements/../requirements.txt
+    #   dataclasses-json
 minijinja==2.2.0
     # via huggingface-hub
 mpmath==1.3.0
-    # via sympy
+    # via
+    #   -c requirements/../requirements.txt
+    #   sympy
 multidict==6.1.0
     # via
     #   -c requirements/../requirements.txt
     #   aiohttp
     #   yarl
 mypy-extensions==1.0.0
-    # via typing-inspect
+    # via
+    #   -c requirements/../requirements.txt
+    #   typing-inspect
 nest-asyncio==1.6.0
     # via llama-index-core
 networkx==3.2.1
@@ -182,16 +191,22 @@ requests==2.32.3
     #   tiktoken
     #   transformers
 safetensors==0.4.5
-    # via transformers
+    # via
+    #   -c requirements/../requirements.txt
+    #   transformers
 scikit-learn==1.5.2
-    # via sentence-transformers
+    # via
+    #   -c requirements/../requirements.txt
+    #   sentence-transformers
 scipy==1.13.1
     # via
     #   -c requirements/../requirements.txt
     #   scikit-learn
     #   sentence-transformers
 sentence-transformers==3.1.1
-    # via llama-index-embeddings-huggingface
+    # via
+    #   -c requirements/../requirements.txt
+    #   llama-index-embeddings-huggingface
 sniffio==1.3.1
     # via
     #   -c requirements/../requirements.txt
@@ -199,14 +214,21 @@ sniffio==1.3.1
     #   httpx
 sqlalchemy[asyncio]==2.0.35
     # via
+    #   -c requirements/../requirements.txt
     #   llama-index-core
     #   sqlalchemy
 sympy==1.13.3
-    # via torch
+    # via
+    #   -c requirements/../requirements.txt
+    #   torch
 tenacity==8.5.0
-    # via llama-index-core
+    # via
+    #   -c requirements/../requirements.txt
+    #   llama-index-core
 threadpoolctl==3.5.0
-    # via scikit-learn
+    # via
+    #   -c requirements/../requirements.txt
+    #   scikit-learn
 tiktoken==0.7.0
     # via
     #   -c requirements/../requirements.txt
@@ -215,8 +237,10 @@ tokenizers==0.19.1
     # via
     #   -c requirements/../requirements.txt
     #   transformers
-torch==2.2.2
-    # via sentence-transformers
+torch==2.4.1
+    # via
+    #   -c requirements/../requirements.txt
+    #   sentence-transformers
 tqdm==4.66.5
     # via
     #   -c requirements/../requirements.txt
@@ -226,7 +250,9 @@ tqdm==4.66.5
     #   sentence-transformers
     #   transformers
 transformers==4.44.2
-    # via sentence-transformers
+    # via
+    #   -c requirements/../requirements.txt
+    #   sentence-transformers
 typing-extensions==4.12.2
     # via
     #   -c requirements/../requirements.txt
@@ -239,6 +265,7 @@ typing-extensions==4.12.2
     #   typing-inspect
 typing-inspect==0.9.0
     # via
+    #   -c requirements/../requirements.txt
     #   dataclasses-json
     #   llama-index-core
 urllib3==2.2.3
@@ -253,3 +280,6 @@ yarl==1.11.1
     # via
     #   -c requirements/../requirements.txt
     #   aiohttp
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

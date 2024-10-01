@@ -138,7 +138,7 @@ class Commands:
             self.io.tool_output("Please provide a partial model name to search for.")
 
     def cmd_web(self, args):
-        "Scrape a webpage, convert to markdown and send in a message"
+        "Scrape a webpage, convert to markdown, and add to the vector store"
 
         url = args.strip()
         if not url:
@@ -158,9 +158,12 @@ class Commands:
         content = self.scraper.scrape(url) or ""
         content = f"{url}:\n\n" + content
 
-        self.io.tool_output("... done.")
+        # Add the scraped content to the vector store
+        self.coder.add_to_vector_store(content, metadata={"source": url})
 
-        return content
+        self.io.tool_output(f"Added scraped content from {url} to the vector store.")
+
+        return
 
     def is_command(self, inp):
         return inp[0] in "/!"
@@ -927,6 +930,7 @@ class Commands:
                 self.io.tool_output(f"{cmd} No description available.")
         self.io.tool_output()
         self.io.tool_output("Use `/help <question>` to ask questions about how to use aider.")
+        self.io.tool_output("Use `/read-only-vector <file or directory>` to add files to the vector store for reference.")
 
     def cmd_help(self, args):
         "Ask questions about aider"
@@ -1186,6 +1190,63 @@ class Commands:
         else:
             self.io.tool_output(f"No new files added from directory {original_name}.")
 
+
+
+    def cmd_vector_stats(self, args):
+        "Print statistics about the vector store"
+        if not args.strip():
+            self.io.tool_error("Please provide filenames or directories to read.")
+            return
+
+    def cmd_read_only_vector(self, args):
+        "Add files to the vector store for reference, not to be edited"
+
+        filenames = parse_quoted_filenames(args)
+        for word in filenames:
+            expanded_path = os.path.expanduser(word)
+            abs_path = self.coder.abs_root_path(expanded_path)
+
+            if not os.path.exists(abs_path):
+                self.io.tool_error(f"Path not found: {abs_path}")
+                continue
+
+            if os.path.isfile(abs_path):
+                self._add_read_only_vector_file(abs_path, word)
+            elif os.path.isdir(abs_path):
+                self._add_read_only_vector_directory(abs_path, word)
+            else:
+                self.io.tool_error(f"Not a file or directory: {abs_path}")
+
+    def _add_read_only_vector_file(self, abs_path, original_name):
+        if abs_path in self.coder.abs_fnames:
+            self.io.tool_error(f"{original_name} is already in the chat as an editable file")
+            return
+
+        content = self.io.read_text(abs_path)
+        if content is not None:
+            relative_path = self.coder.get_rel_fname(abs_path)
+            self.coder.add_to_vector_store(content, metadata={"path": relative_path})
+            self.io.tool_output(f"Added {original_name} to the vector store.")
+
+    def _add_read_only_vector_directory(self, abs_path, original_name):
+        added_files = 0
+        for root, _, files in os.walk(abs_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if file_path not in self.coder.abs_fnames:
+                    content = self.io.read_text(file_path)
+                    if content is not None:
+                        relative_path = self.coder.get_rel_fname(file_path)
+                        self.coder.add_to_vector_store(content, metadata={"path": relative_path})
+                        added_files += 1
+
+        if added_files > 0:
+            self.io.tool_output(
+                f"Added {added_files} files from directory {original_name} to the vector store."
+            )
+        else:
+            self.io.tool_output(f"No new files added from directory {original_name}.")
+
     def cmd_map(self, args):
         "Print out the current repository map"
         repo_map = self.coder.get_repo_map()
@@ -1199,6 +1260,14 @@ class Commands:
         repo_map = self.coder.get_repo_map(force_refresh=True)
         if repo_map:
             self.io.tool_output("The repo map has been refreshed, use /map to view it.")
+
+    def cmd_vector_stats(self, args):
+        "Print statistics about the vector store"
+        if hasattr(self.coder, 'vector_store'):
+            stats = self.coder.vector_store.get_db_stats()
+            self.io.tool_output(stats)
+        else:
+            self.io.tool_error("Vector store is not initialized.")
 
     def cmd_settings(self, args):
         "Print out the current settings"

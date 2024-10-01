@@ -28,6 +28,7 @@ pexpect
 json5
 psutil
 
+
 # The proper dependency is networkx[default], but this brings
 # in matplotlib and a bunch of other deps
 # https://github.com/networkx/networkx/blob/d7132daa8588f653eacac7a5bae1ee85a183fa43/pyproject.toml#L57
@@ -55,3 +56,11 @@ numpy<2
 # Going past this makes dependencies unresolvable
 # Seems to be caused by sentence-transformers
 tokenizers==0.19.1
+
+
+
+langchain-community
+langchain-openai
+langchain-text-splitters
+sqlite-vss
+sentence-transformers
